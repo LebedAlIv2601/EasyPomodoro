@@ -1,0 +1,29 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: AI Review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_API_KEY: ${{ secrets.AI_REVIEW_API_KEY }}
+        run: |
+          # Вызов API для получения ревью
+          RESPONSE=$(curl -s --location 'https://mcpsystem-production.up.railway.app/api/review-pr' \
+            --header "X-API-Key: $AI_API_KEY" \
+            --header 'Content-Type: application/json' \
+            --data '{"pr_number": ${{ github.event.pull_request.number }}}')
+
+          # Извлечение текста ревью из ответа
+          REVIEW=$(echo "$RESPONSE" | jq -r '.review')
+
+          # Публикация комментария на PR
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$REVIEW"
