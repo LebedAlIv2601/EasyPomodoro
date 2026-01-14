@@ -5,7 +5,8 @@ data class TimerUiState(
     val phaseLabel: String,
     val isRunning: Boolean,
     val progress: Float,
-    val phaseType: PhaseType
+    val phaseType: PhaseType,
+    val buttonsColor: ButtonsColor
 ) {
     companion object {
         val Initial = TimerUiState(
@@ -13,9 +14,14 @@ data class TimerUiState(
             phaseLabel = "Work 1/4",
             isRunning = false,
             progress = 1f,
-            phaseType = PhaseType.WORK
+            phaseType = PhaseType.WORK,
+            buttonsColor = ButtonsColor.STANDART
         )
     }
+}
+
+enum class ButtonsColor {
+    STANDART, NOT_STANDART
 }
 
 enum class PhaseType {

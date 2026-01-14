@@ -4,4 +4,5 @@ sealed interface TimerEvent {
     data object OnStartClick : TimerEvent
     data object OnStopClick : TimerEvent
     data object OnResetClick : TimerEvent
+    data object OnChangeColorClick : TimerEvent
 }

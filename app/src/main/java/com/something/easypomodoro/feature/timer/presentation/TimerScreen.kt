@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +70,10 @@ private fun TimerScreenContent(
         label = "trackColor"
     )
 
+    val buttonsColor = remember(state.buttonsColor) {
+        if(state.buttonsColor == ButtonsColor.STANDART) progressColor else Color.Blue
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -98,13 +103,13 @@ private fun TimerScreenContent(
                     PomodoroButton(
                         text = "Stop",
                         onClick = { onEvent(TimerEvent.OnStopClick) },
-                        containerColor = progressColor
+                        containerColor = buttonsColor
                     )
                 } else {
                     PomodoroButton(
                         text = "Start",
                         onClick = { onEvent(TimerEvent.OnStartClick) },
-                        containerColor = progressColor
+                        containerColor = buttonsColor
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -112,11 +117,20 @@ private fun TimerScreenContent(
                     PomodoroOutlinedButton(
                         text = "Reset",
                         onClick = { onEvent(TimerEvent.OnResetClick) },
-                        borderColor = progressColor,
-                        contentColor = progressColor
+                        borderColor = buttonsColor,
+                        contentColor = buttonsColor
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            PomodoroOutlinedButton(
+                text = "ChangeColor",
+                onClick = { onEvent(TimerEvent.OnChangeColorClick) },
+                borderColor = buttonsColor,
+                contentColor = buttonsColor
+            )
         }
     }
 }
