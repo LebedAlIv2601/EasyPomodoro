@@ -8,10 +8,13 @@ import com.something.easypomodoro.feature.timer.domain.usecase.ObserveTimerUseCa
 import com.something.easypomodoro.feature.timer.domain.usecase.ResetTimerUseCase
 import com.something.easypomodoro.feature.timer.domain.usecase.StartTimerUseCase
 import com.something.easypomodoro.feature.timer.domain.usecase.StopTimerUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 class TimerViewModel(
     observeTimerUseCase: ObserveTimerUseCase,
@@ -20,8 +23,13 @@ class TimerViewModel(
     private val resetTimerUseCase: ResetTimerUseCase
 ) : ViewModel() {
 
-    val state: StateFlow<TimerUiState> = observeTimerUseCase()
-        .map { it.toUiState() }
+    private val buttonsColor = MutableStateFlow(ButtonsColor.STANDART)
+
+    val state: StateFlow<TimerUiState> = combine(
+        observeTimerUseCase(),
+        buttonsColor,
+        ::createUiState
+    )
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -33,16 +41,24 @@ class TimerViewModel(
             TimerEvent.OnStartClick -> startTimerUseCase()
             TimerEvent.OnStopClick -> stopTimerUseCase()
             TimerEvent.OnResetClick -> resetTimerUseCase()
+            TimerEvent.OnChangeColorClick -> changeButtonsColor()
         }
     }
 
-    private fun TimerState.toUiState(): TimerUiState {
+    private fun changeButtonsColor() {
+        buttonsColor.update {
+            if(it == ButtonsColor.STANDART) ButtonsColor.NOT_STANDART else ButtonsColor.STANDART
+        }
+    }
+
+    private fun createUiState(timerState: TimerState, buttonsColor: ButtonsColor): TimerUiState {
         return TimerUiState(
-            timeFormatted = formatTime(remainingSeconds),
-            phaseLabel = phase.toLabel(),
-            isRunning = isRunning,
-            progress = progress,
-            phaseType = phase.toPhaseType()
+            timeFormatted = formatTime(timerState.remainingSeconds),
+            phaseLabel = timerState.phase.toLabel(),
+            isRunning = timerState.isRunning,
+            progress = timerState.progress,
+            phaseType = timerState.phase.toPhaseType(),
+            buttonsColor = buttonsColor
         )
     }
 
